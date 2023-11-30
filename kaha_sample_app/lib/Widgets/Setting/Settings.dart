@@ -16,7 +16,7 @@ class _SettingsState extends State<Settings> {
   TimeOfDay _openingTime = TimeOfDay.now();
   TimeOfDay _closingTime = TimeOfDay.now();
   String _selectedInverter = 'Growatt';
-  List<String> _inverters = ['Growatt', 'Voltronic', 'Deye'];
+  List<String> _inverters = ['Growatt', 'Voltronic', 'Deye', 'Must'];
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   TimeOfDay _stringToTimeOfDay(String? timeString) {
