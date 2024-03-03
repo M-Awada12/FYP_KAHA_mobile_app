@@ -17,6 +17,19 @@ class _SettingsState extends State<Settings> {
   TimeOfDay _closingTime = TimeOfDay.now();
   String _selectedInverter = 'Growatt';
   List<String> _inverters = ['Growatt', 'Voltronic', 'Deye', 'Must'];
+  List<String> _days = [
+    'Monday',
+    'Tuesday',
+    'Wednesday',
+    'Thursday',
+    'Friday',
+    'Saturday',
+    'Sunday'
+  ];
+  List<String> _GeneratorType = ['Counter', 'CutOff'];
+  late bool isChecked = false;
+  String selectedDay = 'Monday';
+  String selectedGeneratorType = 'Counter';
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   TimeOfDay _stringToTimeOfDay(String? timeString) {
@@ -56,6 +69,7 @@ class _SettingsState extends State<Settings> {
       _selectedInverter = _prefs.getString('selectedInverter') ?? _inverters[0];
       _openingTime = _stringToTimeOfDay(_prefs.getString('openingTime') ?? '');
       _closingTime = _stringToTimeOfDay(_prefs.getString('closingTime') ?? '');
+      isChecked = _prefs.getBool('isChecked') ?? false;
     });
   }
 
@@ -76,8 +90,7 @@ class _SettingsState extends State<Settings> {
 
       if (response.statusCode == 200) {
         var responseData = json.decode(response.body);
-        var serverMessage = responseData[
-            'message'];
+        var serverMessage = responseData['message'];
         print('Request sent successfully');
         _showResponseMessage(serverMessage);
       } else {
@@ -116,6 +129,30 @@ class _SettingsState extends State<Settings> {
                 textAlign: TextAlign.center,
               ),
               SizedBox(height: 20),
+              /*DropdownButtonFormField<String>(
+                value: selectedDay,
+                onChanged: isChecked
+                    ? null
+                    : (newValue) {
+                        setState(() {
+                          selectedDay = newValue!;
+                        });
+                      },
+                items: _days.map((day) {
+                  return DropdownMenuItem<String>(
+                    value: day,
+                    child: Text(day),
+                  );
+                }).toList(),
+                decoration: InputDecoration(
+                  labelText: 'Day of the week',
+                  // Assuming primaryColor is defined elsewhere
+                  fillColor: primaryColor,
+                  labelStyle: TextStyle(color: primaryColor),
+                  border: OutlineInputBorder(),
+                ),
+              ),*/
+              SizedBox(height: 20.0),
               ListTile(
                 title: Text(
                   'Generator Starting Time',
@@ -159,6 +196,37 @@ class _SettingsState extends State<Settings> {
                     },
                     child: Text(_closingTime.format(context)),
                   ),
+                ),
+              ),
+              /*CheckboxListTile(
+                title: Text('Apply to all Days'),
+                value: isChecked,
+                onChanged: (value) {
+                  setState(() {
+                    isChecked = value!;
+                    _prefs.setBool('isChecked', value);
+                  });
+                },
+              ),*/
+              SizedBox(height: 20.0),
+              DropdownButtonFormField<String>(
+                value: selectedGeneratorType,
+                onChanged: (newValue) {
+                  setState(() {
+                    selectedGeneratorType = newValue!;
+                  });
+                },
+                items: _GeneratorType.map((inverter) {
+                  return DropdownMenuItem<String>(
+                    value: inverter,
+                    child: Text(inverter),
+                  );
+                }).toList(),
+                decoration: InputDecoration(
+                  labelText: 'Generator Type',
+                  fillColor: primaryColor,
+                  labelStyle: TextStyle(color: primaryColor),
+                  border: OutlineInputBorder(),
                 ),
               ),
               SizedBox(height: 20.0),

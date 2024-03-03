@@ -200,16 +200,18 @@ class Status extends StatefulWidget {
 class _StatusState extends State<Status> {
   late SharedPreferences _prefs;
   late TextEditingController _ipController;
-  String current = '7 A';
+  late String current1;
+  late String current2;
+  late String current3;
 
   @override
   void initState() {
     super.initState();
     _ipController = TextEditingController();
-    //_initSharedPreferences();
+    _initSharedPreferences();
   }
 
-  /*Future<void> _initSharedPreferences() async {
+  Future<void> _initSharedPreferences() async {
     _prefs = await SharedPreferences.getInstance();
     setState(() {
       _ipController.text = _prefs.getString('ipAddress') ?? '';
@@ -226,14 +228,16 @@ class _StatusState extends State<Status> {
   }
 
   Future<void> _sendRequestToServer(String ipAddress) async {
-    var url = Uri.parse('http://$ipAddress:8000/getCurrent');
+    var url = Uri.parse('http://$ipAddress:8000/data');
     try {
       var response = await http.get(url);
       if (response.statusCode == 200) {
         var responseData = json.decode(response.body);
         var serverMessage = responseData['message'];
         setState(() {
-          current = serverMessage;
+          current1 = serverMessage['Solar Panel Current'];
+          current2 = serverMessage['Load Current'];
+          current3 = serverMessage['Grid Current'];
         });
       } else {
         print('Failed to send request. Status code: ${response.statusCode}');
@@ -243,7 +247,7 @@ class _StatusState extends State<Status> {
       print('Error sending request: $e');
       _showResponseMessage('Error sending request: $e');
     }
-  }*/
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -257,29 +261,29 @@ class _StatusState extends State<Status> {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              CustomBox(number: '1 A', label: 'First'),
-              CustomBox(number: '2 V', label: 'Second'),
+              CustomBox(number: current1, label: ' Solar Current '),
+              CustomBox(number: current2, label: ' Solar Voltage '),
             ],
           ),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              CustomBox(number: '3 A', label: 'Third'),
-              CustomBox(number: '4 V', label: 'Fourth'),
+              CustomBox(number: current3, label: ' Grid Current '),
+              CustomBox(number: '220 V', label: ' Grid Voltage '),
             ],
           ),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              CustomBox(number: '5 W', label: 'Fifth'),
-              CustomBox(number: '6 A', label: 'Sixth'),
+              CustomBox(number: '5.7 W', label: ' Batt. Power '),
+              CustomBox(number: '6.1 A', label: ' Batt. Current '),
             ],
           ),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              CustomBox(number: '7 W', label: 'Seventh'),
-              CustomBox(number: '8 W', label: 'Eighth'),
+              CustomBox(number: '7.6 W', label: ' Solar Power '),
+              CustomBox(number: '5.2 W', label: ' Grid Power '),
             ],
           ),
           /*Text(

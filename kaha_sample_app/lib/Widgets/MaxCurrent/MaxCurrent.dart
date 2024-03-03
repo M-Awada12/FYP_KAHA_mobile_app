@@ -131,7 +131,7 @@ class _MaxCurrentState extends State<MaxCurrent> {
   }
 
   Future<void> _sendRequestToServer(String ipAddress) async {
-    var url = Uri.parse('http://$ipAddress:8000/MaxCurrent');
+    var url = Uri.parse('http://$ipAddress:8000/MaxCurrent/' + maxCurrent.text);
 
     try {
       var requestBody = json.encode(maxCurrent.text);
@@ -224,7 +224,7 @@ class _MaxCurrentState extends State<MaxCurrent> {
                 ),
               ),
               SizedBox(height: 20.0),
-              ElevatedButton(
+              /*ElevatedButton(
                 onPressed: () {
                   showDialog(
                     context: context,
@@ -298,7 +298,7 @@ class _MaxCurrentState extends State<MaxCurrent> {
                   );
                 },
                 child: Text('Schedule'),
-              ),
+              ),*/
               SizedBox(height: 20.0),
               ElevatedButton(
                 onPressed: () async {
