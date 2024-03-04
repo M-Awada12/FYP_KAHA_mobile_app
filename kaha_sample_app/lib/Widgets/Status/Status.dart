@@ -9,7 +9,7 @@ class CustomBox extends StatefulWidget {
   final String number;
   final String label;
 
-  const CustomBox({
+  CustomBox({
     Key? key,
     required this.number,
     required this.label,
@@ -64,11 +64,9 @@ class LineGraphPainter extends CustomPainter {
       path.lineTo(i * xScale, height - (data[i] - minY) * yScale);
     }
 
-    
     canvas.drawLine(Offset(0, height), Offset(width, height), paint);
     canvas.drawLine(Offset(0, 0), Offset(0, height), paint);
 
-    
     final yLabelsCount = 5;
     final yLabelInterval = (maxY - minY) / (yLabelsCount - 1);
     for (int i = 0; i < yLabelsCount; i++) {
@@ -133,8 +131,7 @@ class _CustomBoxState extends State<CustomBox> {
             children: <Widget>[
               Text('Graph'),
               LineGraph(data: [20, 40, 30, 50, 70, 45, 60]),
-              SizedBox(
-                  height: 50),
+              SizedBox(height: 50),
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: <Widget>[
@@ -200,9 +197,10 @@ class Status extends StatefulWidget {
 class _StatusState extends State<Status> {
   late SharedPreferences _prefs;
   late TextEditingController _ipController;
-  late String current1;
-  late String current2;
-  late String current3;
+  String current1 = '';
+  String current2 = '';
+  String current3 = '';
+  bool gotData = false;
 
   @override
   void initState() {
@@ -238,14 +236,22 @@ class _StatusState extends State<Status> {
           current1 = serverMessage['Solar Panel Current'];
           current2 = serverMessage['Load Current'];
           current3 = serverMessage['Grid Current'];
+          gotData = true;
         });
       } else {
         print('Failed to send request. Status code: ${response.statusCode}');
-        _showResponseMessage('Failed to send request. Status code: ${response.statusCode}');
+        current1 = '';
+        current2 = '';
+        current3 = '';
+        _showResponseMessage(
+            'Failed to send request. Status code: ${response.statusCode}');
       }
     } catch (e) {
       print('Error sending request: $e');
       _showResponseMessage('Error sending request: $e');
+      current1 = '';
+      current2 = '';
+      current3 = '';
     }
   }
 
@@ -257,36 +263,44 @@ class _StatusState extends State<Status> {
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              CustomBox(number: current1, label: ' Solar Current '),
-              CustomBox(number: current2, label: ' Solar Voltage '),
-            ],
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              CustomBox(number: current3, label: ' Grid Current '),
-              CustomBox(number: '220 V', label: ' Grid Voltage '),
-            ],
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              CustomBox(number: '5.7 W', label: ' Batt. Power '),
-              CustomBox(number: '6.1 A', label: ' Batt. Current '),
-            ],
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-            children: [
-              CustomBox(number: '7.6 W', label: ' Solar Power '),
-              CustomBox(number: '5.2 W', label: ' Grid Power '),
-            ],
-          ),
-          /*Text(
+        children: gotData
+            ? [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    CustomBox(number: current1, label: ' Solar Current '),
+                    CustomBox(number: current2, label: ' Solar Voltage '),
+                  ],
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    CustomBox(number: current3, label: ' Grid Current '),
+                    CustomBox(number: '220 V', label: ' Grid Voltage '),
+                  ],
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    CustomBox(number: '5.7 W', label: ' Batt. Power '),
+                    CustomBox(number: '6.1 A', label: ' Batt. Current '),
+                  ],
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    CustomBox(number: '7.6 W', label: ' Solar Power '),
+                    CustomBox(number: '5.2 W', label: ' Grid Power '),
+                  ],
+                ),
+              ]
+            : [
+                Text(
+                  'Error fetching data: No connection',
+                  style: TextStyle(color: primaryColor),
+                ),
+              ],
+        /*Text(
             'Charging Current',
             style: TextStyle(
               fontSize: 24,
@@ -315,7 +329,6 @@ class _StatusState extends State<Status> {
               textAlign: TextAlign.center,
             ),
           ),*/
-        ],
       ),
     );
   }
