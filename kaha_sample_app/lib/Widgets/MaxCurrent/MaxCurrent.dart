@@ -41,12 +41,10 @@ class MyTable extends StatelessWidget {
               child: Container(
                 height: 23.4,
                 decoration: BoxDecoration(
-                  border: Border.all(
-                      color: Colors.grey[300]!),
+                  border: Border.all(color: Colors.grey[300]!),
                 ),
                 alignment: Alignment.center,
-                child: buildActivitiesForHour(
-                    hours[index]),
+                child: buildActivitiesForHour(hours[index]),
               ),
             ),
           ],
@@ -113,6 +111,8 @@ class _MaxCurrentState extends State<MaxCurrent> {
   }
 
   void _showResponseMessage(String message) {
+    if (!mounted) return; // Check if the state is still active
+
     final snackBar = SnackBar(
       content: Text(message),
       duration: Duration(seconds: 2),
@@ -130,28 +130,47 @@ class _MaxCurrentState extends State<MaxCurrent> {
     });
   }
 
-  Future<void> _sendRequestToServer(String ipAddress) async {
-    var url = Uri.parse('http://$ipAddress:8000/MaxCurrent/' + maxCurrent.text);
+  Future<void> _sendRequestToServer() async {
+    var url = Uri.parse('http://192.168.1.16:8000/MaxCurrent');
 
     try {
-      var requestBody = json.encode(maxCurrent.text);
+      // Parse maxCurrent.text to ensure it's a valid float
+      double? maxCurrentValue = double.tryParse(maxCurrent.text);
+      if (maxCurrentValue == null) {
+        // Handle invalid input
+        print('Invalid max current value: ${maxCurrent.text}');
+        return;
+      }
 
+      // Prepare the data to be sent in the request
+      Map<String, dynamic> data = {
+        'value': maxCurrentValue,
+        'automatic': isYesSelected,
+      };
+
+      // Send the POST request
       var response = await http.post(
         url,
-        body: requestBody,
+        body: json.encode(data),
+        headers: {
+          'Content-Type': 'application/json', // Specify JSON content type
+        },
       );
 
+      // Check the response status code
       if (response.statusCode == 200) {
         var responseData = json.decode(response.body);
         var serverMessage = responseData['message'];
         print('Request sent successfully');
         _showResponseMessage(serverMessage);
       } else {
+        // Handle unsuccessful request
         print('Failed to send request. Status code: ${response.statusCode}');
         _showResponseMessage(
             'Failed to send request. Status code: ${response.statusCode}');
       }
     } catch (e) {
+      // Handle exceptions
       print('Error sending request: $e');
       _showResponseMessage('Error sending request: $e');
     }
@@ -194,7 +213,7 @@ class _MaxCurrentState extends State<MaxCurrent> {
                     },
                   ),
                   Text(
-                    'Model',
+                    'Automatically',
                     style: TextStyle(color: Theme.of(context).primaryColor),
                   ),
                   SizedBox(width: 20),
@@ -305,7 +324,7 @@ class _MaxCurrentState extends State<MaxCurrent> {
                   await _prefs.setString('MaxCurrent', maxCurrent.text);
                   String ipAddress = _ipController.text;
                   print('Sending request to server with IP: $ipAddress');
-                  await _sendRequestToServer(ipAddress);
+                  await _sendRequestToServer();
                 },
                 child: Text('Submit'),
               ),

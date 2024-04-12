@@ -156,7 +156,7 @@ class _CustomBoxState extends State<CustomBox> {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: showGraph,
+      //onTap: showGraph,
       child: Container(
         margin: EdgeInsets.all(8.0),
         decoration: BoxDecoration(
@@ -214,28 +214,31 @@ class _StatusState extends State<Status> {
     setState(() {
       _ipController.text = _prefs.getString('ipAddress') ?? '';
     });
-    _sendRequestToServer(_ipController.text);
+    _sendRequestToServer();
   }
 
   void _showResponseMessage(String message) {
+    if (!mounted) return; // Check if the state is still active
+
     final snackBar = SnackBar(
       content: Text(message),
       duration: Duration(seconds: 2),
     );
+
     ScaffoldMessenger.of(context).showSnackBar(snackBar);
   }
 
-  Future<void> _sendRequestToServer(String ipAddress) async {
-    var url = Uri.parse('http://$ipAddress:8000/data');
+  Future<void> _sendRequestToServer() async {
+    var url = Uri.parse('http://192.168.1.16:8000/data');
     try {
       var response = await http.get(url);
       if (response.statusCode == 200) {
         var responseData = json.decode(response.body);
-        var serverMessage = responseData['message'];
+        //var serverMessage = Map<String, dynamic>.from(responseData);
         setState(() {
-          current1 = serverMessage['Solar Panel Current'];
-          current2 = serverMessage['Load Current'];
-          current3 = serverMessage['Grid Current'];
+          current1 = responseData['Solar Panel Current'];
+          current2 = responseData['Load Current'];
+          current3 = responseData['Grid Current'];
           gotData = true;
         });
       } else {
@@ -295,9 +298,8 @@ class _StatusState extends State<Status> {
                 ),
               ]
             : [
-                Text(
-                  'Error fetching data: No connection',
-                  style: TextStyle(color: primaryColor),
+                Center(
+                  child: CircularProgressIndicator(),
                 ),
               ],
         /*Text(
