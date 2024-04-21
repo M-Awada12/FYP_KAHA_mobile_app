@@ -131,7 +131,7 @@ class _MaxCurrentState extends State<MaxCurrent> {
   }
 
   Future<void> _sendRequestToServer() async {
-    var url = Uri.parse('http://192.168.1.16:8000/MaxCurrent');
+    var url = Uri.parse('https://kaha-cloud-server.onrender.com/MaxCurrent');
 
     try {
       // Parse maxCurrent.text to ensure it's a valid float

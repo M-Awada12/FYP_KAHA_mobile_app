@@ -158,7 +158,10 @@ class _CustomBoxState extends State<CustomBox> {
     return GestureDetector(
       //onTap: showGraph,
       child: Container(
+        height: 100, // Set the fixed height
+        width: 110,
         margin: EdgeInsets.all(8.0),
+        padding: EdgeInsets.all(8.0),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(12.0),
           color: Colors.blue,
@@ -169,17 +172,20 @@ class _CustomBoxState extends State<CustomBox> {
             Text(
               '$currentNumber',
               style: TextStyle(
-                fontSize: 30.0,
+                fontSize: 21.0,
                 fontWeight: FontWeight.bold,
                 color: Colors.white,
               ),
             ),
-            SizedBox(height: 5.0, width: 90),
-            Text(
-              widget.label,
-              style: TextStyle(
-                fontSize: 16.0,
-                color: Colors.white,
+            SizedBox(height: 5.0),
+            Center(
+              child: Text(
+                widget.label, // Display label or empty string if null
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 14.0,
+                  color: Colors.white,
+                ),
               ),
             ),
           ],
@@ -229,7 +235,7 @@ class _StatusState extends State<Status> {
   }
 
   Future<void> _sendRequestToServer() async {
-    var url = Uri.parse('http://192.168.1.16:8000/data');
+    var url = Uri.parse('https://kaha-cloud-server.onrender.com/data');
     try {
       var response = await http.get(url);
       if (response.statusCode == 200) {

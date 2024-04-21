@@ -16,11 +16,14 @@ class _SettingsState extends State<Settings> {
   TimeOfDay _openingTime = TimeOfDay.now();
   TimeOfDay _closingTime = TimeOfDay.now();
   String _selectedInverter = 'Growatt';
+  String selected_power_connection = 'Through the Inverter';
   late TextEditingController number_of_panels = TextEditingController();
   late TextEditingController latitude = TextEditingController();
   late TextEditingController longitude = TextEditingController();
+  late TextEditingController generator_max_value = TextEditingController();
   String generator_type = 'Counter';
   List<String> _inverters = ['Growatt', 'Voltronic', 'Deye', 'Must'];
+  List<String> power_connection = ['Through the Inverter', 'Using a Relay'];
   List<String> _days = [
     'Monday',
     'Tuesday',
@@ -57,6 +60,7 @@ class _SettingsState extends State<Settings> {
     number_of_panels = TextEditingController();
     latitude = TextEditingController();
     longitude = TextEditingController();
+    generator_max_value = TextEditingController();
   }
 
   void _showResponseMessage(String message) {
@@ -74,37 +78,41 @@ class _SettingsState extends State<Settings> {
     setState(() {
       _ipController.text = _prefs.getString('ipAddress') ?? '';
       _selectedInverter = _prefs.getString('selectedInverter') ?? _inverters[0];
+      selected_power_connection =
+          _prefs.getString('selectedPowerConnection') ?? power_connection[0];
       _openingTime = _stringToTimeOfDay(_prefs.getString('openingTime') ?? '');
       _closingTime = _stringToTimeOfDay(_prefs.getString('closingTime') ?? '');
       number_of_panels.text = _prefs.getString('number_of_panels') ?? '1';
       latitude.text = _prefs.getString('latitude') ?? '0.00';
       longitude.text = _prefs.getString('longitude') ?? '0.00';
+      generator_max_value.text =
+          _prefs.getString('generator_max_value') ?? '10.00';
       generator_type = _prefs.getString('generator_type') ?? 'Counter';
       isChecked = _prefs.getBool('isChecked') ?? false;
     });
   }
 
   Future<void> _sendRequestToServer() async {
-    var url = Uri.parse('http://192.168.1.16:8000/parameters');
+    var url = Uri.parse('https://kaha-cloud-server.onrender.com/parameters');
 
     try {
       var requestBody = {
         "latitude": latitude.text,
         "longitude": longitude.text,
+        "generator_max_value": generator_max_value.text,
         "panel_number": int.tryParse(number_of_panels.text) ??
             0, // Ensure a default value if parsing fails
         "GeneratorType": generator_type,
         'openingTime': _timeOfDayToString(_openingTime),
         'closingTime': _timeOfDayToString(_closingTime),
         'InverterType': _selectedInverter,
+        'PowerConnection': selected_power_connection,
       };
 
       var response = await http.post(
         url,
         body: json.encode(requestBody),
-        headers: {
-          "Content-Type": "application/json"
-        },
+        headers: {"Content-Type": "application/json"},
       );
 
       if (response.statusCode == 200) {
@@ -250,6 +258,36 @@ class _SettingsState extends State<Settings> {
                   ),
                 ),
                 SizedBox(height: 20.0),
+                TextFormField(
+                  controller: generator_max_value,
+                  keyboardType: TextInputType.number,
+                  decoration: InputDecoration(
+                    labelText: 'Generator Max Value (in A)',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+                SizedBox(height: 20.0),
+                DropdownButtonFormField<String>(
+                  value: selected_power_connection,
+                  onChanged: (newValue) {
+                    setState(() {
+                      selected_power_connection = newValue!;
+                    });
+                  },
+                  items: power_connection.map((inverter) {
+                    return DropdownMenuItem<String>(
+                      value: inverter,
+                      child: Text(inverter),
+                    );
+                  }).toList(),
+                  decoration: InputDecoration(
+                    labelText: 'Power Connection',
+                    fillColor: primaryColor,
+                    labelStyle: TextStyle(color: primaryColor),
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+                SizedBox(height: 20.0),
                 DropdownButtonFormField<String>(
                   value: _selectedInverter,
                   onChanged: (newValue) {
@@ -304,8 +342,12 @@ class _SettingsState extends State<Settings> {
                     await _prefs.setString(
                         'selectedInverter', _selectedInverter);
                     await _prefs.setString(
+                        'selectedPowerConnection', selected_power_connection);
+                    await _prefs.setString(
                         'number_of_panels', number_of_panels.text);
                     await _prefs.setString('latitude', latitude.text);
+                    await _prefs.setString(
+                        'generator_max_value', generator_max_value.text);
                     await _prefs.setString('longitude', longitude.text);
                     await _prefs.setString('generator_type', generator_type);
                     await _prefs.setString(
